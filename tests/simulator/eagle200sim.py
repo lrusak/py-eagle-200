@@ -7,7 +7,7 @@ from lxml import etree
 
 class Eagle200Sim(object):
 
-    auth = {"test": "1234"}
+    auth = {"0077dd": "6e61a3a94882eef9"}
 
     def process_request(self, data):
         xml = etree.fromstring(data)
@@ -26,13 +26,19 @@ class Eagle200Sim(object):
             details = xml.find("DeviceDetails")
             address = details.findtext("HardwareAddress")
             components = xml.find("Components")
-            component = components.find("Component")
-            name = component.findtext("Name")
-            variables = component.find("Variables")
-            variable = variables.find("Variable")
-            value = variable.findtext("Name")
 
-            return self._device_query(address, name, value)
+            all = components.find("All")
+            if all is not None:
+                if all.text ==  "Y":
+                    return self._device_query(address)
+            else:
+                component = components.find("Component")
+                name = component.findtext("Name")
+                variables = component.find("Variables")
+                variable = variables.find("Variable")
+                value = variable.findtext("Name")
+
+                return self._device_query(address, name, value)
 
         abort(400, "Fuction not implemented")
 
@@ -148,7 +154,7 @@ class Eagle200Sim(object):
 
         return etree.tostring(root)
 
-    def _device_query(self, address, name, value):
+    def _device_query(self, address, name=None, value=None):
         """
         Returns the device query for a given hardware address, name, and variable
 
@@ -201,7 +207,10 @@ class Eagle200Sim(object):
         components = etree.SubElement(root, "Components")
         component = etree.SubElement(components, "Component")
 
-        component_map = {"Name": name, "FixedId": "0"}
+        component_map = {"Name": "Main", "FixedId": "0"}
+
+        if name is not None and name != component_map["Name"]:
+            abort(400, "name '%s' doesn't exist" % name)
 
         for key in component_map:
             etree.SubElement(component, key).text = component_map[key]
@@ -218,12 +227,19 @@ class Eagle200Sim(object):
             "zigbee:Message": "Hello, World!",
         }
 
-        if value not in variable_map:
+        if value is not None and value not in variable_map:
             abort(400, "Variable '%s' doesn't exist" % value)
 
-        variable = etree.SubElement(variables, "Variable")
-        etree.SubElement(variable, "Name").text = value
-        etree.SubElement(variable, "Value").text = variable_map[value]
+        if value is None:
+            for key in variable_map:
+                variable = etree.Element("Variable")
+                etree.SubElement(variable, "Name").text = key
+                etree.SubElement(variable, "Value").text = variable_map[key]
+                variables.append(variable)
+        else:
+            variable = etree.SubElement(variables, "Variable")
+            etree.SubElement(variable, "Name").text = value
+            etree.SubElement(variable, "Value").text = variable_map[value]
 
         # print(etree.tostring(root, pretty_print=True).decode())
 
@@ -241,7 +257,7 @@ def get_password(username):
     return eagle.auth[username]
 
 
-@app.route("/", methods=["POST"])
+@app.route("/cgi-bin/post_manager", methods=["POST"])
 @auth.login_required
 def process_request():
     if request.content_type != "text/xml":
@@ -255,4 +271,4 @@ def create_app():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+    app.run(debug=True)

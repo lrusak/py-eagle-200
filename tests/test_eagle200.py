@@ -9,8 +9,9 @@ from flask import url_for
 import libeagle
 from tests.simulator import eagle200sim
 
+import re
 
-@pytest.fixture
+@pytest.fixture(scope="session", autouse=True)
 def app():
     app = eagle200sim.create_app()
     return app
@@ -20,9 +21,10 @@ def app():
 class TestLiveServer:
     def test_eagle200(self):
 
-        conn = libeagle.Connection(
-            url_for("process_request", _external=True), "test", "1234"
-        )
+        url = url_for("process_request", _external=True)
+        port = int(re.search(":([0-9]+)/", url)[1])
+
+        conn = libeagle.Connection("localhost", "0077dd", "6e61a3a94882eef9", port=port, debug=True)
 
         devices = conn.device_list()
         pprint(devices)
@@ -31,13 +33,19 @@ class TestLiveServer:
         pprint(details)
 
         query = conn.device_query(
-            details["HardwareAddress"],
-            details["Components"]["Name"],
-            details["Components"]["Variables"][0],
+            devices[0]["HardwareAddress"],
+            details[0]["Name"],
+            details[0]["Variables"][0],
         )
         pprint(query)
 
         assert (
-            query["Components"]["Variables"]["zigbee:InstantaneousDemand"]
-            == "21.499 kW"
+            query[0]["Variables"]["zigbee:InstantaneousDemand"] == "21.499 kW"
+        )
+
+        query = conn.device_query(devices[0]["HardwareAddress"])
+        pprint(query)
+
+        assert (
+            query[0]["Variables"]["zigbee:Message"] == "Hello, World!"
         )
