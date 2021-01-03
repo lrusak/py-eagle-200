@@ -8,6 +8,8 @@ from pprint import pprint
 
 from lxml import etree
 
+import json
+import xmltodict
 
 class Connection(object):
     def __init__(self, hostname, username, password, port=80, debug=False):
@@ -72,23 +74,9 @@ class Connection(object):
 
         self._debugPrint("return data", etree.tostring(xml, pretty_print=True).decode())
 
-        data = []
-        for device in xml.iter("Device"):
+        data = xmltodict.parse(res)
 
-            map = {
-                "HardwareAddress": "",
-                "Manufacturer": "",
-                "ModelId": "",
-                "Protocol": "",
-                "LastContact": "",
-                "ConnectionStatus": "",
-                "NetworkAddress": "",
-            }
-
-            for key in map:
-                map[key] = device.findtext(key)
-
-            data.append(map)
+        # print(type(data))
 
         return data
 
@@ -130,22 +118,8 @@ class Connection(object):
 
             data = map
         '''
-        data = []
-        components = xml.find("Components")
-        for component in components.iter("Component"):
 
-            map = {"Name": "", "FixedId": ""}
-
-            for key in map:
-                map[key] = component.findtext(key)
-
-            map["Variables"] = []
-
-            variables = component.find("Variables")
-            for variable in variables.iter("Variable"):
-                map["Variables"].append(variable.text)
-
-            data.append(map)
+        data = xmltodict.parse(res)
 
         return data
 
@@ -189,26 +163,7 @@ class Connection(object):
 
         self._debugPrint("return data", etree.tostring(xml, pretty_print=True).decode())
 
-        data = []
-
-        components = xml.find("Components")
-        for component in components.iter("Component"):
-
-          map = { "Name": "", "FixedId": "" }
-
-          for key in map:
-              map[key] = component.findtext(key)
-
-          variables = component.find("Variables")
-          map["Variables"] = {}
-
-          for variable in variables.iter("Variable"):
-              key = variable.findtext("Name")
-              value = variable.findtext("Value")
-
-              map["Variables"][key] = value
-
-          data.append(map)
+        data = xmltodict.parse(res)
 
         return data
 

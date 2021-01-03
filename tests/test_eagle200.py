@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
 import threading
-from pprint import pprint
 
 import pytest
 from flask import url_for
 
 import libeagle
 from tests.simulator import eagle200sim
+
+import json
 
 import re
 
@@ -27,25 +28,28 @@ class TestLiveServer:
         conn = libeagle.Connection("localhost", "0077dd", "6e61a3a94882eef9", port=port, debug=True)
 
         devices = conn.device_list()
-        pprint(devices)
+        print(json.dumps(devices, indent=4))
 
-        details = conn.device_details(devices[0]["HardwareAddress"])
-        pprint(details)
+        details = conn.device_details(devices["DeviceList"]["Device"]["HardwareAddress"])
+        print(json.dumps(details, indent=4))
 
         query = conn.device_query(
-            devices[0]["HardwareAddress"],
-            details[0]["Name"],
-            details[0]["Variables"][0],
+            devices["DeviceList"]["Device"]["HardwareAddress"],
+            details["Device"]["Components"]["Component"]["Name"],
+            details["Device"]["Components"]["Component"]["Variables"]["Variable"][0],
         )
-        pprint(query)
+
+        print(json.dumps(query, indent=4))
 
         assert (
-            query[0]["Variables"]["zigbee:InstantaneousDemand"] == "21.499 kW"
+            query["Device"]["Components"]["Component"]["Variables"]["Variable"]["Value"] == "21.499 kW"
         )
 
-        query = conn.device_query(devices[0]["HardwareAddress"])
-        pprint(query)
+        query = conn.device_query(devices["DeviceList"]["Device"]["HardwareAddress"])
+        print(json.dumps(query, indent=4))
 
-        assert (
-            query[0]["Variables"]["zigbee:Message"] == "Hello, World!"
-        )
+        for x in query["Device"]["Components"]["Component"]["Variables"]["Variable"]:
+            if (x["Name"] == "zigbee:Message"):
+                assert (
+                    x["Value"] == "Hello, World!"
+                )
