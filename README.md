@@ -8,7 +8,7 @@ The API uses an awkward xml format with POST request. This library does it's bes
 
 I'm using this library with some other open source tools (grafana, mosquitto, influxdb, telefraf) to build a power monitor dashboard.
 
-![grafana-dashboard](grafana-power.JPG | width=100)
+![grafana-dashboard](grafana-power.JPG)
 
 ## Simulator
 
