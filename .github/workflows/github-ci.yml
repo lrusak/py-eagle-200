@@ -20,10 +20,10 @@ jobs:
         sudo apt install python3.8 python3-pip python3-wheel python3-lxml
     - name: Update pip
       run: |
-        sudo pip install --upgrade pip
+        sudo pip3 install --upgrade pip
     - name: Install dependencies
       run: |
-        sudo pip install tox
+        sudo pip3 install tox
     - name: Test with tox
       run: |
         tox
