@@ -10,7 +10,9 @@ req_file = os.path.join(os.path.dirname(__file__), "requirements.txt")
 requirements = [line for line in open(req_file) if line]
 
 desc_file = os.path.join(os.path.dirname(__file__), "README.md")
-long_description = [line for line in open(desc_file) if line]
+
+with open(desc_file, encoding='utf-8') as f:
+    long_description = f.read()
 
 setup(
     name="py-eagle-200",
@@ -20,6 +22,7 @@ setup(
     url="https://rainforestautomation.com",
     description="A python wrapper library for the eagle-200 REST API.",
     long_description=long_description,
+    long_description_content_type='text/markdown',
     license="GPLv2",
     packages=["libeagle"],
     package_dir={"libeagle": "libeagle"},
