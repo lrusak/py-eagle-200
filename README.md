@@ -6,6 +6,10 @@ The library was designed around the API documentation available [here](https://r
 
 The API uses an awkward xml format with POST request. This library does it's best to wrap this and provide a more python friendly JSON output.
 
+I'm using this library with some other open source tools (grafana, mosquitto, influxdb, telefraf) to build a power monitor dashboard.
+
+![grafana-dashboard](grafana-power.JPG | width=100)
+
 ## Simulator
 
 A simulator is also provided as I didn't have the device at the time I started this library. I needed a way to test the library to make sure the API calls were correct. Any changes should be validated via tests which may require changes to the simulator as well.
