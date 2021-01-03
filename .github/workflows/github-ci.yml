@@ -17,13 +17,13 @@ jobs:
     - name: Install lxml
       run: |
         sudo apt update
-        sudo apt install python3.8 python3-pip python3-lxml
+        sudo apt install python3.8 python3-pip python3-wheel python3-lxml
     - name: Update pip
       run: |
-        pip install --upgrade pip
+        sudo pip install --upgrade pip
     - name: Install dependencies
       run: |
-        pip install tox
+        sudo pip install tox
     - name: Test with tox
       run: |
         tox
