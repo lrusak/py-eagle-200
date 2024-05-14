@@ -24,7 +24,7 @@ jobs:
     - name: Install python libraries
       run: |
         sudo apt update
-        sudo apt install python3.6 python3.8 python3.9 python3-pip python3-wheel python3-setuptools python3-lxml
+        sudo apt install python3.6 python3.8 python3.9 python3.10 python3.11 python3.12 python3-pip python3-wheel python3-setuptools python3-lxml
     - name: Update pip
       run: |
         sudo pip3 install --upgrade pip
