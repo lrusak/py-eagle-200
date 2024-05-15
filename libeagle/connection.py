@@ -12,6 +12,7 @@ from typing import (
     Type,
 )
 
+
 class Connection(object):
     def __init__(self, hostname, username, password, port=80, debug=False):
         """
@@ -27,13 +28,11 @@ class Connection(object):
         self.logger = logging.getLogger()
 
         if debug:
-           self.logger.setLevel(logging.DEBUG)
+            self.logger.setLevel(logging.DEBUG)
 
         url = f"http://{hostname}:{port}"
 
-        headers = {
-            "Content-type": "text/xml"
-        }
+        headers = {"Content-type": "text/xml"}
 
         auth = aiohttp.BasicAuth(username, password)
 
@@ -85,7 +84,7 @@ class Connection(object):
         data = []
         for device in xml.iter("Device"):
 
-            device_data = { detail.tag:detail.text for detail in device.iter() }
+            device_data = {detail.tag: detail.text for detail in device.iter()}
             data.append(device_data)
 
         return data
@@ -138,7 +137,9 @@ class Connection(object):
 
         return details
 
-    async def device_query(self, address, component_name=None, variable_name=None) -> dict:
+    async def device_query(
+        self, address, component_name=None, variable_name=None
+    ) -> dict:
         """
         Returns the device query for a given hardware address, name, and variable
 
@@ -155,7 +156,7 @@ class Connection(object):
         components = etree.SubElement(root, "Components")
 
         if component_name is None and variable_name is None:
-            etree.SubElement(components, 'All').text = 'Y'
+            etree.SubElement(components, "All").text = "Y"
 
         elif component_name is not None and variable_name is not None:
             component = etree.SubElement(components, "Component")
