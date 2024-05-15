@@ -2,8 +2,8 @@
 
 from flask import Flask, abort, jsonify, request
 from flask_httpauth import HTTPBasicAuth
-from lxml import etree
 
+import xml.etree.ElementTree as etree
 
 class Eagle200Sim(object):
 
@@ -76,7 +76,7 @@ class Eagle200Sim(object):
         for key in map:
             etree.SubElement(device, key).text = map[key]
 
-        # print(etree.tostring(root, pretty_print=True).decode())
+        # print(etree.tostring(root).decode())
 
         return etree.tostring(root)
 
@@ -150,7 +150,7 @@ class Eagle200Sim(object):
         for item in variable_list:
             etree.SubElement(variables, "Variable").text = item
 
-        # print(etree.tostring(root, pretty_print=True).decode())
+        # print(etree.tostring(root).decode())
 
         return etree.tostring(root)
 
@@ -241,7 +241,7 @@ class Eagle200Sim(object):
             etree.SubElement(variable, "Name").text = value
             etree.SubElement(variable, "Value").text = variable_map[value]
 
-        # print(etree.tostring(root, pretty_print=True).decode())
+        # print(etree.tostring(root).decode())
 
         return etree.tostring(root)
 

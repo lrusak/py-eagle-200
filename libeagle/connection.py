@@ -6,8 +6,7 @@ import urllib.parse
 import urllib.request
 from pprint import pprint
 
-from lxml import etree
-
+import xml.etree.ElementTree as etree
 
 class Connection(object):
     def __init__(self, hostname, username, password, port=80, debug=False):
@@ -64,13 +63,13 @@ class Connection(object):
         etree.SubElement(root, "Name").text = "device_list"
         values = etree.tostring(root)
 
-        self._debugPrint("POST data", etree.tostring(root, pretty_print=True).decode())
+        self._debugPrint("POST data", etree.tostring(root).decode())
 
         req = self._getRequest(values)
         res = self._doRequest(req)
         xml = etree.fromstring(res)
 
-        self._debugPrint("return data", etree.tostring(xml, pretty_print=True).decode())
+        self._debugPrint("return data", etree.tostring(xml).decode())
 
         data = []
         for device in xml.iter("Device"):
@@ -105,13 +104,13 @@ class Connection(object):
         etree.SubElement(device_details, "HardwareAddress").text = address
         values = etree.tostring(root)
 
-        self._debugPrint("POST data", etree.tostring(root, pretty_print=True).decode())
+        self._debugPrint("POST data", etree.tostring(root).decode())
 
         req = self._getRequest(values)
         res = self._doRequest(req)
         xml = etree.fromstring(res)
 
-        self._debugPrint("return data", etree.tostring(xml, pretty_print=True).decode())
+        self._debugPrint("return data", etree.tostring(xml).decode())
 
         '''
         data = {}
@@ -181,13 +180,13 @@ class Connection(object):
 
         values = etree.tostring(root)
 
-        self._debugPrint("POST data", etree.tostring(root, pretty_print=True).decode())
+        self._debugPrint("POST data", etree.tostring(root).decode())
 
         req = self._getRequest(values)
         res = self._doRequest(req)
         xml = etree.fromstring(res)
 
-        self._debugPrint("return data", etree.tostring(xml, pretty_print=True).decode())
+        self._debugPrint("return data", etree.tostring(xml).decode())
 
         data = []
 
