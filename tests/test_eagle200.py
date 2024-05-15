@@ -26,20 +26,48 @@ class TestLiveServer:
 
             devices = await conn.device_list()
 
-            details = await conn.device_details(devices[0]["HardwareAddress"])
+            assert len(devices) > 0
 
-            query = await conn.device_query(
-                devices[0]["HardwareAddress"],
-                details[0]["Name"],
-                details[0]["Variables"][0],
-            )
+            for device in devices:
+                assert "HardwareAddress" in device
 
-            assert (
-                query[0]["Variables"]["zigbee:InstantaneousDemand"] == "21.499 kW"
-            )
+                details = await conn.device_details(device["HardwareAddress"])
 
-            query = await conn.device_query(devices[0]["HardwareAddress"])
+                assert len(details) > 0
 
-            assert (
-                query[0]["Variables"]["zigbee:Message"] == "Hello, World!"
-            )
+                for detail in details:
+
+                    assert "Name" in detail
+                    assert "Variables" in detail
+                    assert len(detail["Variables"]) > 0
+                    assert "zigbee:InstantaneousDemand" in detail["Variables"]
+
+                    query = await conn.device_query(
+                        device["HardwareAddress"],
+                        detail["Name"],
+                        "zigbee:InstantaneousDemand",
+                    )
+
+                    assert len(query) > 0
+
+                    for component in query:
+
+                        assert "Variables" in component
+                        assert "zigbee:InstantaneousDemand" in component["Variables"]
+
+                        assert (
+                            component["Variables"]["zigbee:InstantaneousDemand"] == "21.499 kW"
+                        )
+
+                query = await conn.device_query(device["HardwareAddress"])
+
+                assert len(query) > 0
+
+                for component in query:
+
+                    assert "Variables" in component
+                    assert "zigbee:Message" in component["Variables"]
+
+                    assert (
+                        component["Variables"]["zigbee:Message"] == "Hello, World!"
+                    )
