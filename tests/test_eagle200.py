@@ -9,7 +9,7 @@ from flask import url_for
 import libeagle
 from tests.simulator import eagle200sim
 
-import re
+from urllib.parse import urlsplit
 
 @pytest.fixture(scope="session", autouse=True)
 def app():
@@ -21,10 +21,9 @@ def app():
 class TestLiveServer:
     def test_eagle200(self):
 
-        url = url_for("process_request", _external=True)
-        port = int(re.search(":([0-9]+)/", url)[1])
+        url = urlsplit(url_for("process_request", _external=True))
 
-        conn = libeagle.Connection("localhost", "0077dd", "6e61a3a94882eef9", port=port, debug=True)
+        conn = libeagle.Connection(url.hostname, "0077dd", "6e61a3a94882eef9", port=url.port, debug=True)
 
         devices = conn.device_list()
         pprint(devices)
