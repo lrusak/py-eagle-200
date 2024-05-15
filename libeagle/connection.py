@@ -14,7 +14,14 @@ from typing import (
 
 
 class Connection(object):
-    def __init__(self, hostname, username, password, port=80, debug=False):
+    def __init__(
+        self,
+        hostname: str,
+        username: str,
+        password: str,
+        port: int = 80,
+        debug: bool = False,
+    ):
         """
         This will create a connection to your eagle-200
 
@@ -89,7 +96,7 @@ class Connection(object):
 
         return data
 
-    async def device_details(self, address) -> dict:
+    async def device_details(self, address: str) -> dict:
         """
         Returns the device details for a given hardware address
 
@@ -138,7 +145,7 @@ class Connection(object):
         return details
 
     async def device_query(
-        self, address, component_name=None, variable_name=None
+        self, address: str, component_name: str = None, variable_name: str = None
     ) -> dict:
         """
         Returns the device query for a given hardware address, name, and variable
