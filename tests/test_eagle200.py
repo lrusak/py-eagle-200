@@ -35,8 +35,11 @@ class TestLiveServer:
 
                 assert len(details) > 0
 
-                for detail in details:
+                assert "Name" in details
+                assert "HardwareAddress" in details
+                assert "Components" in details
 
+                for detail in details["Components"]:
                     assert "Name" in detail
                     assert "Variables" in detail
                     assert len(detail["Variables"]) > 0

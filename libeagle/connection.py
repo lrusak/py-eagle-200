@@ -88,7 +88,7 @@ class Connection(object):
 
         return data
 
-    async def device_details(self, address) -> list[dict]:
+    async def device_details(self, address) -> dict:
         """
         Returns the device details for a given hardware address
 
@@ -107,29 +107,34 @@ class Connection(object):
             res = await self._doRequest(values)
         except Exception as e:
             self.logger.error(e)
-            return []
+            return {}
 
         xml = etree.fromstring(res)
 
         self.logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
-        data = []
-        components = xml.find("Components")
-        for component in components.iter("Component"):
+        details = {"Components": []}
+
+        device_details = xml.find("DeviceDetails")
+        for detail in device_details.iter():
+            details[detail.tag] = detail.text
+
+        for component in xml.findall("Component"):
 
             component_data = {}
 
             for detail in component.iter():
+
                 if detail.tag == "Variables":
                     component_data["Variables"] = []
                     for variable in component.iter():
-                        component_data["Variables"].append(variable.text)
+                        component_data["Components"]["Variables"].append(variable.text)
                 else:
                     component_data[detail.tag] = detail.text
 
-                data.append(component_data)
+                details["Components"].append(component_data)
 
-        return data
+        return details
 
     async def device_query(self, address, component_name=None, variable_name=None) -> list[dict]:
         """
