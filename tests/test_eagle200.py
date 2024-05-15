@@ -8,6 +8,7 @@ from tests.simulator import eagle200sim
 
 from urllib.parse import urlsplit
 
+
 @pytest.fixture(scope="session", autouse=True)
 def app():
     app = eagle200sim.create_app()
@@ -22,7 +23,9 @@ class TestLiveServer:
 
         url = urlsplit(url_for("process_request", _external=True))
 
-        async with libeagle.Connection(url.hostname, "0077dd", "6e61a3a94882eef9", port=url.port, debug=True) as conn:
+        async with libeagle.Connection(
+            url.hostname, "0077dd", "6e61a3a94882eef9", port=url.port, debug=True
+        ) as conn:
 
             devices = await conn.device_list()
 
@@ -62,7 +65,8 @@ class TestLiveServer:
                         assert "zigbee:InstantaneousDemand" in component["Variables"]
 
                         assert (
-                            component["Variables"]["zigbee:InstantaneousDemand"] == "21.499 kW"
+                            component["Variables"]["zigbee:InstantaneousDemand"]
+                            == "21.499 kW"
                         )
 
                 query = await conn.device_query(device["HardwareAddress"])
@@ -77,6 +81,4 @@ class TestLiveServer:
                     assert "Variables" in component
                     assert "zigbee:Message" in component["Variables"]
 
-                    assert (
-                        component["Variables"]["zigbee:Message"] == "Hello, World!"
-                    )
+                    assert component["Variables"]["zigbee:Message"] == "Hello, World!"

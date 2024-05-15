@@ -5,6 +5,7 @@ from flask_httpauth import HTTPBasicAuth
 
 import xml.etree.ElementTree as etree
 
+
 class Eagle200Sim(object):
 
     auth = {"0077dd": "6e61a3a94882eef9"}
@@ -29,7 +30,7 @@ class Eagle200Sim(object):
 
             all = components.find("All")
             if all is not None:
-                if all.text ==  "Y":
+                if all.text == "Y":
                     return self._device_query(address)
             else:
                 component = components.find("Component")
