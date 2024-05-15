@@ -5,7 +5,7 @@ description = "A python wrapper library for the eagle-200 REST API"
 license = "GPL-2.0"
 authors = ["Lukas Rusak <lorusak@gmail.com>"]
 readme = "README.md"
-packages = [{include = "*", from="libeagle"}]
+packages = [{include = "libeagle", from="src"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
