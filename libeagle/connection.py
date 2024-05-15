@@ -4,9 +4,12 @@
 
 import urllib.parse
 import urllib.request
-from pprint import pprint
+
+import logging
 
 import xml.etree.ElementTree as etree
+
+logger = logging.getLogger()
 
 class Connection(object):
     def __init__(self, hostname, username, password, port=80, debug=False):
@@ -23,6 +26,10 @@ class Connection(object):
         self._username = username
         self._password = password
         self._port = port
+
+        global logger
+
+        logger.setLevel(logging.DEBUG) if debug else logger.setLevel(logging.INFO)
         self._debug = debug
         self._url = self._getUrl()
         self._opener = self._getOpener()
@@ -46,6 +53,7 @@ class Connection(object):
         self._opener = self._getOpener()
 
     def setDebug(self, debug):
+        logger.setLevel(logging.DEBUG) if debug else logger.setLevel(logging.INFO)
         self._debug = debug
 
     hostname = property(lambda s: s._hostname, setHostname)
@@ -63,13 +71,13 @@ class Connection(object):
         etree.SubElement(root, "Name").text = "device_list"
         values = etree.tostring(root)
 
-        self._debugPrint("POST data", etree.tostring(root).decode())
+        logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         req = self._getRequest(values)
         res = self._doRequest(req)
         xml = etree.fromstring(res)
 
-        self._debugPrint("return data", etree.tostring(xml).decode())
+        logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
         data = []
         for device in xml.iter("Device"):
@@ -104,13 +112,13 @@ class Connection(object):
         etree.SubElement(device_details, "HardwareAddress").text = address
         values = etree.tostring(root)
 
-        self._debugPrint("POST data", etree.tostring(root).decode())
+        logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         req = self._getRequest(values)
         res = self._doRequest(req)
         xml = etree.fromstring(res)
 
-        self._debugPrint("return data", etree.tostring(xml).decode())
+        logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
         '''
         data = {}
@@ -180,13 +188,13 @@ class Connection(object):
 
         values = etree.tostring(root)
 
-        self._debugPrint("POST data", etree.tostring(root).decode())
+        logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         req = self._getRequest(values)
         res = self._doRequest(req)
         xml = etree.fromstring(res)
 
-        self._debugPrint("return data", etree.tostring(xml).decode())
+        logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
         data = []
 
@@ -214,7 +222,7 @@ class Connection(object):
     def _getUrl(self):
         url = "http://%s:%d/cgi-bin/post_manager" % (self._hostname, self._port)
 
-        self._debugPrint("URL", url)
+        logger.debug(f"URL: {url}")
 
         return url
 
@@ -232,26 +240,21 @@ class Connection(object):
     def _getRequest(self, values):
         headers = {"Content-type": "text/xml"}
 
-        self._debugPrint("data", values)
+        logger.debug(f"data: {values.decode()}")
 
         req = urllib.request.Request(self._url, values, headers)
 
-        self._debugPrint("custom headers", req.headers)
+        logger.debug(f"custom headers: {req.headers}")
 
         return req
 
     def _doRequest(self, req):
         try:
             res = self._opener.open(req)
-            self._debugPrint("default headers", req.unredirected_hdrs)
+            logger.debug(f"default headers: {req.unredirected_hdrs}")
 
         except urllib.error.HTTPError as e:
             raise e
 
-        return res.read().decode("utf-8")
+        return res.read().decode()
 
-    def _debugPrint(self, header, data):
-        if self._debug:
-            print("-- " + header + " ----------")
-            print(data)
-            print("")
