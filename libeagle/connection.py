@@ -12,8 +12,6 @@ from typing import (
     Type,
 )
 
-logger = logging.getLogger()
-
 class Connection(object):
     def __init__(self, hostname, username, password, port=80, debug=False):
         """
@@ -26,8 +24,8 @@ class Connection(object):
         debug:bool          Enable debug logging
         """
 
-        global logger
-        logger.setLevel(logging.DEBUG) if debug else logger.setLevel(logging.INFO)
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.DEBUG) if debug else self.logger.setLevel(logging.INFO)
 
         self.url = f"http://{hostname}:{port}"
 
@@ -70,7 +68,7 @@ class Connection(object):
         etree.SubElement(root, "Name").text = "device_list"
         values = etree.tostring(root)
 
-        logger.debug(f"POST data: {etree.tostring(root).decode()}")
+        self.logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         try:
             res = await self._doRequest(values)
@@ -80,7 +78,7 @@ class Connection(object):
 
         xml = etree.fromstring(res)
 
-        logger.debug(f"return data: {etree.tostring(xml).decode()}")
+        self.logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
         data = []
         for device in xml.iter("Device"):
@@ -115,7 +113,7 @@ class Connection(object):
         etree.SubElement(device_details, "HardwareAddress").text = address
         values = etree.tostring(root)
 
-        logger.debug(f"POST data: {etree.tostring(root).decode()}")
+        self.logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         try:
             res = await self._doRequest(values)
@@ -125,7 +123,7 @@ class Connection(object):
 
         xml = etree.fromstring(res)
 
-        logger.debug(f"return data: {etree.tostring(xml).decode()}")
+        self.logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
         '''
         data = {}
@@ -195,7 +193,7 @@ class Connection(object):
 
         values = etree.tostring(root)
 
-        logger.debug(f"POST data: {etree.tostring(root).decode()}")
+        self.logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         try:
             res = await self._doRequest(values)
@@ -205,7 +203,7 @@ class Connection(object):
 
         xml = etree.fromstring(res)
 
-        logger.debug(f"return data: {etree.tostring(xml).decode()}")
+        self.logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
         data = []
 
