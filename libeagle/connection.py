@@ -72,7 +72,7 @@ class Connection(object):
         self.logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         try:
-            res = await self._doRequest(values)
+            res = await self._post(values)
         except Exception as e:
             self.logger.error(e)
             return []
@@ -105,7 +105,7 @@ class Connection(object):
         self.logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         try:
-            res = await self._doRequest(values)
+            res = await self._post(values)
         except Exception as e:
             self.logger.error(e)
             return {}
@@ -174,7 +174,7 @@ class Connection(object):
         self.logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
         try:
-            res = await self._doRequest(values)
+            res = await self._post(values)
         except Exception as e:
             self.logger.error(e)
             return []
@@ -209,7 +209,7 @@ class Connection(object):
 
         return query
 
-    async def _doRequest(self, values) -> bytes:
+    async def _post(self, values) -> bytes:
         async with self.session.post("/cgi-bin/post_manager", data=values) as response:
             response.raise_for_status()
 
