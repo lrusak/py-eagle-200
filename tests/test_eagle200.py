@@ -52,8 +52,11 @@ class TestLiveServer:
                     )
 
                     assert len(query) > 0
+                    assert "Name" in query
+                    assert "HardwareAddress" in query
+                    assert "Components" in query
 
-                    for component in query:
+                    for component in query["Components"]:
 
                         assert "Variables" in component
                         assert "zigbee:InstantaneousDemand" in component["Variables"]
@@ -65,8 +68,11 @@ class TestLiveServer:
                 query = await conn.device_query(device["HardwareAddress"])
 
                 assert len(query) > 0
+                assert "Name" in query
+                assert "HardwareAddress" in query
+                assert "Components" in query
 
-                for component in query:
+                for component in query["Components"]:
 
                     assert "Variables" in component
                     assert "zigbee:Message" in component["Variables"]

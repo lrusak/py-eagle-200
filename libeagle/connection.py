@@ -136,7 +136,7 @@ class Connection(object):
 
         return details
 
-    async def device_query(self, address, component_name=None, variable_name=None) -> list[dict]:
+    async def device_query(self, address, component_name=None, variable_name=None) -> dict:
         """
         Returns the device query for a given hardware address, name, and variable
 
@@ -180,25 +180,31 @@ class Connection(object):
 
         self.logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
-        data = []
+        query = {"Components": []}
 
-        components = xml.find("Components")
-        for component in components.iter("Component"):
+        device_details = xml.find("DeviceDetails")
+        for detail in device_details.iter():
+            query[detail.tag] = detail.text
+
+        for component in xml.findall("Component"):
 
             component_data = {}
 
             for detail in component.iter():
+
                 if detail.tag == "Variables":
-                    component_data["Variables"] = {}
+                    component_data["Variables"] = []
 
                     for variable in detail.iter("Variable"):
                         key = variable.findtext("Name")
                         value = variable.findtext("Value")
                         component_data["Variables"][key] = value
+                else:
+                    component_data[detail.tag] = detail.text
 
-            data.append(component_data)
+                query["Components"].append(component_data)
 
-        return data
+        return query
 
     async def _doRequest(self, values) -> bytes:
         async with self.session.post("/cgi-bin/post_manager", data=values) as response:
