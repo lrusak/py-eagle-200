@@ -83,20 +83,8 @@ class Connection(object):
         data = []
         for device in xml.iter("Device"):
 
-            map = {
-                "HardwareAddress": "",
-                "Manufacturer": "",
-                "ModelId": "",
-                "Protocol": "",
-                "LastContact": "",
-                "ConnectionStatus": "",
-                "NetworkAddress": "",
-            }
-
-            for key in map:
-                map[key] = device.findtext(key)
-
-            data.append(map)
+            device_data = { detail.tag:detail.text for detail in device.iter() }
+            data.append(device_data)
 
         return data
 
@@ -146,18 +134,17 @@ class Connection(object):
         components = xml.find("Components")
         for component in components.iter("Component"):
 
-            map = {"Name": "", "FixedId": ""}
+            component_data = {}
 
-            for key in map:
-                map[key] = component.findtext(key)
+            for detail in component.iter():
+                if detail.tag == "Variables":
+                    component_data["Variables"] = []
+                    for variable in component.iter():
+                        component_data["Variables"].append(variable.text)
+                else:
+                    component_data[detail.tag] = detail.text
 
-            map["Variables"] = []
-
-            variables = component.find("Variables")
-            for variable in variables.iter("Variable"):
-                map["Variables"].append(variable.text)
-
-            data.append(map)
+                data.append(component_data)
 
         return data
 
@@ -210,21 +197,18 @@ class Connection(object):
         components = xml.find("Components")
         for component in components.iter("Component"):
 
-          map = { "Name": "", "FixedId": "" }
+            component_data = {}
 
-          for key in map:
-              map[key] = component.findtext(key)
+            for detail in component.iter():
+                if detail.tag == "Variables":
+                    component_data["Variables"] = {}
 
-          variables = component.find("Variables")
-          map["Variables"] = {}
+                    for variable in detail.iter("Variable"):
+                        key = variable.findtext("Name")
+                        value = variable.findtext("Value")
+                        component_data["Variables"][key] = value
 
-          for variable in variables.iter("Variable"):
-              key = variable.findtext("Name")
-              value = variable.findtext("Value")
-
-              map["Variables"][key] = value
-
-          data.append(map)
+            data.append(component_data)
 
         return data
 
