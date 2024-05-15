@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "py-eagle-200"
+version = "0.1.0"
+description = "A python wrapper library for the eagle-200 REST API"
+license = "GPL-2.0"
+authors = ["Lukas Rusak <lorusak@gmail.com>"]
+readme = "README.md"
+packages = [{include = "*", from="libeagle"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+Flask = "^3.0.3"
+Flask-HTTPAuth = "^4.8.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.0"
+pytest-flask = "^1.3.0"
+tox = "^4.15.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
