@@ -1,11 +1,16 @@
 # SPDX-License-Identifier: GPL-2.0-only
 
-import urllib.parse
-import urllib.request
+import aiohttp
 
 import logging
 
 import xml.etree.ElementTree as etree
+
+from types import TracebackType
+from typing import (
+    Optional,
+    Type,
+)
 
 logger = logging.getLogger()
 
@@ -20,47 +25,43 @@ class Connection(object):
         port:int            The port to use for the connection (This is only needed for testing)
         debug:bool          Enable debug logging
         """
-        self._hostname = hostname
-        self._username = username
-        self._password = password
-        self._port = port
 
         global logger
-
         logger.setLevel(logging.DEBUG) if debug else logger.setLevel(logging.INFO)
-        self._debug = debug
-        self._url = self._getUrl()
-        self._opener = self._getOpener()
 
-    def setHostname(self, hostname):
-        self._hostname = hostname
-        self._url = self._getUrl()
-        self._opener = self._getOpener()
+        self.url = f"http://{hostname}:{port}"
 
-    def setUsername(self, username):
-        self._username = username
-        self._opener = self._getOpener()
+        headers = {
+            "Content-type": "text/xml"
+        }
 
-    def setPassword(self, password):
-        self._password = password
-        self._opener = self._getOpener()
+        auth = aiohttp.BasicAuth(username, password)
 
-    def setPort(self, port):
-        self._port = port
-        self._url = self._getUrl()
-        self._opener = self._getOpener()
+        self.session = aiohttp.ClientSession(self.url, headers=headers, auth=auth)
 
-    def setDebug(self, debug):
-        logger.setLevel(logging.DEBUG) if debug else logger.setLevel(logging.INFO)
-        self._debug = debug
+    def __enter__(self) -> None:
+        raise TypeError("Use async with instead")
 
-    hostname = property(lambda s: s._hostname, setHostname)
-    username = property(lambda s: s._username, setUsername)
-    password = property(lambda s: s._password, setPassword)
-    port = property(lambda s: s._port, setPort)
-    debug = property(lambda s: s._debug, setDebug)
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        pass
 
-    def device_list(self):
+    async def __aenter__(self) -> "Connection":
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
+        await self.session.close()
+
+    async def device_list(self) -> list[dict]:
         """
         Returns the device list
         """
@@ -71,8 +72,12 @@ class Connection(object):
 
         logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
-        req = self._getRequest(values)
-        res = self._doRequest(req)
+        try:
+            res = await self._doRequest(values)
+        except Exception as e:
+            self.logger.error(e)
+            return []
+
         xml = etree.fromstring(res)
 
         logger.debug(f"return data: {etree.tostring(xml).decode()}")
@@ -97,7 +102,7 @@ class Connection(object):
 
         return data
 
-    def device_details(self, address):
+    async def device_details(self, address) -> list[dict]:
         """
         Returns the device details for a given hardware address
 
@@ -112,8 +117,12 @@ class Connection(object):
 
         logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
-        req = self._getRequest(values)
-        res = self._doRequest(req)
+        try:
+            res = await self._doRequest(values)
+        except Exception as e:
+            self.logger.error(e)
+            return []
+
         xml = etree.fromstring(res)
 
         logger.debug(f"return data: {etree.tostring(xml).decode()}")
@@ -154,7 +163,7 @@ class Connection(object):
 
         return data
 
-    def device_query(self, address, component_name=None, variable_name=None):
+    async def device_query(self, address, component_name=None, variable_name=None) -> list[dict]:
         """
         Returns the device query for a given hardware address, name, and variable
 
@@ -188,8 +197,12 @@ class Connection(object):
 
         logger.debug(f"POST data: {etree.tostring(root).decode()}")
 
-        req = self._getRequest(values)
-        res = self._doRequest(req)
+        try:
+            res = await self._doRequest(values)
+        except Exception as e:
+            self.logger.error(e)
+            return []
+
         xml = etree.fromstring(res)
 
         logger.debug(f"return data: {etree.tostring(xml).decode()}")
@@ -217,42 +230,8 @@ class Connection(object):
 
         return data
 
-    def _getUrl(self):
-        url = "http://%s:%d/cgi-bin/post_manager" % (self._hostname, self._port)
+    async def _doRequest(self, values) -> bytes:
+        async with self.session.post("/cgi-bin/post_manager", data=values) as response:
+            response.raise_for_status()
 
-        logger.debug(f"URL: {url}")
-
-        return url
-
-    def _getOpener(self):
-        password_mgr = urllib.request.HTTPPasswordMgrWithDefaultRealm()
-
-        password_mgr.add_password(None, self._url, self._username, self._password)
-        handler = urllib.request.HTTPBasicAuthHandler(password_mgr)
-
-        opener = urllib.request.build_opener(handler)
-        urllib.request.install_opener(opener)
-
-        return opener
-
-    def _getRequest(self, values):
-        headers = {"Content-type": "text/xml"}
-
-        logger.debug(f"data: {values.decode()}")
-
-        req = urllib.request.Request(self._url, values, headers)
-
-        logger.debug(f"custom headers: {req.headers}")
-
-        return req
-
-    def _doRequest(self, req):
-        try:
-            res = self._opener.open(req)
-            logger.debug(f"default headers: {req.unredirected_hdrs}")
-
-        except urllib.error.HTTPError as e:
-            raise e
-
-        return res.read().decode()
-
+            return await response.content.read()

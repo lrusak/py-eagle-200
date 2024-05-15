@@ -16,28 +16,30 @@ def app():
 
 @pytest.mark.usefixtures("live_server")
 class TestLiveServer:
-    def test_eagle200(self):
+
+    @pytest.mark.asyncio
+    async def test_eagle200(self):
 
         url = urlsplit(url_for("process_request", _external=True))
 
-        conn = libeagle.Connection(url.hostname, "0077dd", "6e61a3a94882eef9", port=url.port, debug=True)
+        async with libeagle.Connection(url.hostname, "0077dd", "6e61a3a94882eef9", port=url.port, debug=True) as conn:
 
-        devices = conn.device_list()
+            devices = await conn.device_list()
 
-        details = conn.device_details(devices[0]["HardwareAddress"])
+            details = await conn.device_details(devices[0]["HardwareAddress"])
 
-        query = conn.device_query(
-            devices[0]["HardwareAddress"],
-            details[0]["Name"],
-            details[0]["Variables"][0],
-        )
+            query = await conn.device_query(
+                devices[0]["HardwareAddress"],
+                details[0]["Name"],
+                details[0]["Variables"][0],
+            )
 
-        assert (
-            query[0]["Variables"]["zigbee:InstantaneousDemand"] == "21.499 kW"
-        )
+            assert (
+                query[0]["Variables"]["zigbee:InstantaneousDemand"] == "21.499 kW"
+            )
 
-        query = conn.device_query(devices[0]["HardwareAddress"])
+            query = await conn.device_query(devices[0]["HardwareAddress"])
 
-        assert (
-            query[0]["Variables"]["zigbee:Message"] == "Hello, World!"
-        )
+            assert (
+                query[0]["Variables"]["zigbee:Message"] == "Hello, World!"
+            )
