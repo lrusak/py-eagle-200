@@ -27,7 +27,7 @@ class Connection(object):
         self.logger = logging.getLogger()
         self.logger.setLevel(logging.DEBUG) if debug else self.logger.setLevel(logging.INFO)
 
-        self.url = f"http://{hostname}:{port}"
+        url = f"http://{hostname}:{port}"
 
         headers = {
             "Content-type": "text/xml"
@@ -35,7 +35,7 @@ class Connection(object):
 
         auth = aiohttp.BasicAuth(username, password)
 
-        self.session = aiohttp.ClientSession(self.url, headers=headers, auth=auth)
+        self.session = aiohttp.ClientSession(url, headers=headers, auth=auth)
 
     def __enter__(self) -> None:
         raise TypeError("Use async with instead")
