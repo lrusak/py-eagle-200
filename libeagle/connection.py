@@ -113,23 +113,6 @@ class Connection(object):
 
         self.logger.debug(f"return data: {etree.tostring(xml).decode()}")
 
-        '''
-        data = {}
-        for detail in xml.iter("DeviceDetails"):
-
-            map = {
-                "Name": "",
-                "HardwareAddress": "",
-                "Protocol": "",
-                "Manufacturer": "",
-                "ModelId": "",
-            }
-
-            for key in map:
-                map[key] = detail.findtext(key)
-
-            data = map
-        '''
         data = []
         components = xml.find("Components")
         for component in components.iter("Component"):
