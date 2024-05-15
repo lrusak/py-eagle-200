@@ -25,7 +25,9 @@ class Connection(object):
         """
 
         self.logger = logging.getLogger()
-        self.logger.setLevel(logging.DEBUG) if debug else self.logger.setLevel(logging.INFO)
+
+        if debug:
+           self.logger.setLevel(logging.DEBUG)
 
         url = f"http://{hostname}:{port}"
 
