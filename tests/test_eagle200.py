@@ -41,6 +41,7 @@ class TestLiveServer:
                 assert "Name" in details
                 assert "HardwareAddress" in details
                 assert "Components" in details
+                assert len(details["Components"]) > 0
 
                 for detail in details["Components"]:
                     assert "Name" in detail
@@ -58,6 +59,7 @@ class TestLiveServer:
                     assert "Name" in query
                     assert "HardwareAddress" in query
                     assert "Components" in query
+                    assert len(query["Components"]) > 0
 
                     for component in query["Components"]:
 
@@ -75,6 +77,7 @@ class TestLiveServer:
                 assert "Name" in query
                 assert "HardwareAddress" in query
                 assert "Components" in query
+                assert len(query["Components"]) > 0
 
                 for component in query["Components"]:
 

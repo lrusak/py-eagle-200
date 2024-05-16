@@ -127,20 +127,20 @@ class Connection(object):
         for detail in device_details.iter():
             details[detail.tag] = detail.text
 
-        for component in xml.findall("Component"):
+        components = xml.find("Components").findall("Component")
+        for component in components:
 
             component_data = {}
 
-            for detail in component.iter():
-
+            for detail in component:
                 if detail.tag == "Variables":
                     component_data["Variables"] = []
-                    for variable in component.iter():
-                        component_data["Components"]["Variables"].append(variable.text)
+                    for variable in detail:
+                        component_data["Variables"].append(variable.text)
                 else:
                     component_data[detail.tag] = detail.text
 
-                details["Components"].append(component_data)
+            details["Components"].append(component_data)
 
         return details
 
@@ -196,23 +196,23 @@ class Connection(object):
         for detail in device_details.iter():
             query[detail.tag] = detail.text
 
-        for component in xml.findall("Component"):
+        for component in xml.find("Components").findall("Component"):
 
             component_data = {}
 
-            for detail in component.iter():
+            for detail in component:
 
                 if detail.tag == "Variables":
-                    component_data["Variables"] = []
+                    component_data["Variables"] = {}
 
-                    for variable in detail.iter("Variable"):
+                    for variable in detail:
                         key = variable.findtext("Name")
                         value = variable.findtext("Value")
                         component_data["Variables"][key] = value
                 else:
                     component_data[detail.tag] = detail.text
 
-                query["Components"].append(component_data)
+            query["Components"].append(component_data)
 
         return query
 
