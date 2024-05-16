@@ -12,6 +12,8 @@ from typing import (
     Type,
 )
 
+import sys
+
 
 class Connection(object):
     def __init__(
@@ -32,7 +34,18 @@ class Connection(object):
         debug:bool          Enable debug logging
         """
 
-        self.logger = logging.getLogger()
+        format = logging.Formatter(
+            "%(asctime)s - [%(levelname)s] - %(message)s", "%Y-%m-%d %H:%M:%S"
+        )
+
+        handler = logging.StreamHandler(stream=sys.stdout)
+        handler.setFormatter(format)
+
+        if debug:
+            handler.setLevel(logging.DEBUG)
+
+        self.logger = logging.getLogger("libeagle")
+        self.logger.addHandler(handler)
 
         if debug:
             self.logger.setLevel(logging.DEBUG)
